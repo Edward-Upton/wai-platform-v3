@@ -39,9 +39,9 @@ export const clientSchema = z.object({
   NEXT_PUBLIC_URL: z.preprocess(
     // This makes Vercel deployments not fail if you don't set NEXT_PUBLIC_URL
     // Since NextAuth automatically uses the NEXT_PUBLIC_VERCEL_URL if present.
-    (str) => process.env.NEXT_PUBLIC_VERCEL_URL ?? str,
+    (str) => "https://" + process.env.NEXT_PUBLIC_VERCEL_URL ?? str,
     // NEXT_PUBLIC_VERCEL_URL doesnt include `https` so it cant be validated as a URL
-    process.env.VERCEL ? z.string() : z.string().url()
+    z.string().url()
   ),
   NEXT_PUBLIC_DISCORD_CLIENT_ID: z.string(),
   NEXT_PUBLIC_DISCORD_REDIRECT_URI: z.string(),
