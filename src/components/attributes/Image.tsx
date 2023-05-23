@@ -100,20 +100,15 @@ const ImageAttribute = ({ attribute, edit }: AttributeProps) => {
         // Create a new form data
         const formData = new FormData();
 
-        // Add the signed URL fields to the form data
-        Object.entries(signedUrl.fields).forEach(([key, value]) => {
-          formData.append(key, value);
-        });
-
         // Add the file to the form data
         formData.append("file", file);
 
         setUploadStatus("uploading");
 
         // Upload the file
-        const res = await fetch(signedUrl.url, {
-          method: "POST",
-          body: formData,
+        const res = await fetch(signedUrl, {
+          method: "PUT",
+          body: file,
         });
 
         if (res.ok) {

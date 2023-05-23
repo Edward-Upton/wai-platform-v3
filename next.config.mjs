@@ -26,6 +26,6 @@ export default defineNextConfig({
     defaultLocale: "en",
   },
   images: {
-    domains: ["www.gravatar.com", "cdn.warwick.ai"],
+    domains: ["www.gravatar.com", "cdn.warwick.ai", "pub-46ab9dc183aa45cbbb92e73e27f7efea.r2.dev"],
   },
 });

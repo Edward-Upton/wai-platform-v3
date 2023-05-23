@@ -3,8 +3,8 @@ import { z } from "zod";
 import { IMAGE_MIME_TYPES } from "../../../components/attributes/Image";
 import { env } from "../../../env/server.mjs";
 import { publicProcedure, router, authedProcedure } from "../trpc";
-import { S3Client } from "@aws-sdk/client-s3";
-import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const MAX_FILE_SIZE = 1024 * 1024 * 10; // 10MB
 
@@ -15,12 +15,12 @@ const MAX_FILE_SIZE = 1024 * 1024 * 10; // 10MB
 //   region: env.DO_SPACES_REGION,
 // });
 
-const SPACES_ENDPOINT = `https://${env.DO_SPACES_REGION}.digitaloceanspaces.com`;
+const SPACES_ENDPOINT = `https://${env.DO_SPACES_REGION}.r2.cloudflarestorage.com`;
 
 const s3Client = new S3Client({
   forcePathStyle: false,
   endpoint: SPACES_ENDPOINT,
-  region: "us-east-1", // this can be ignored for DigitalOcean Spaces
+  region: "auto", // this can be ignored for DigitalOcean Spaces
   credentials: {
     accessKeyId: env.DO_SPACES_ACCESS_KEY_ID,
     secretAccessKey: env.DO_SPACES_SECRET_KEY,
@@ -108,16 +108,17 @@ export const fileRouter = router({
 
       const Bucket = env.DO_SPACES_BUCKET;
       const Key = file.uuid;
-      const Fields = {
-        acl: "public-read",
-      };
 
-      const signedUrl = await createPresignedPost(s3Client, {
-        Bucket,
-        Key,
-        Fields,
-        Expires: 600, //Seconds before the presigned post expires. 3600 by default.
-      });
+      const signedUrl = await getSignedUrl(
+        s3Client,
+        new PutObjectCommand({
+          Bucket,
+          Key,
+        }),
+        {
+          expiresIn: 60 * 60 * 24 * 7, // 7d
+        }
+      );
 
       return {
         file,
